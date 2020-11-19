@@ -1,0 +1,56 @@
+{
+  "min_packer_version": "0.12.0",
+  "variables": {
+    "aws_region": "${region}",
+    "nomad_version": "${nomad_version}",
+    "consul_version": "${consul_version}",
+    "vault_version": "${vault_version}"
+  },
+  "builders": [
+    {
+      "name": "ubuntu20-ami",
+      "ami_name": "hashistacc-ubuntu20-{{timestamp}}",
+      "ami_description": "Ubuntu 20.04 AMI that has Nomad, Consul and Vault installed",
+      "instance_type": "t2.micro",
+      "region": "{{user \`aws_region\`}}",
+      "ami_regions": ["{{user \`aws_region\`}}"],
+      "type": "amazon-ebs",
+      "source_ami_filter": {
+       "filters": {
+         "virtualization-type": "hvm",
+         "architecture": "x86_64",
+         "name": "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*",
+         "block-device-mapping.volume-type": "gp2",
+         "root-device-type": "ebs"
+       },
+       "owners": [
+         "099720109477"
+       ],
+       "most_recent": true
+      },
+      "ssh_username": "ubuntu"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "${script_dir}/shutdown-apt-services.sh"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "NOMAD_VERSION={{user \`nomad_version\`}}",
+        "CONSUL_VERSION={{user \`consul_version\`}}",
+        "VAULT_VERSION={{user \`vault_version\`}}"
+      ],
+      "script": "${script_dir}/setup.sh"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo systemctl enable apt-daily.timer",
+        "sudo systemctl enable apt-daily-upgrade.timer"
+        ]
+    }
+  ]
+}

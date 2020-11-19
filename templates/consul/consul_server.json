@@ -1,0 +1,43 @@
+{
+  "datacenter":"${datacenter}",
+  "bind_addr": "$PRIVATE_IP",
+  "advertise_addr": "$PRIVATE_IP",
+  "advertise_addr_wan": "$PUBLIC_IP",
+  "translate_wan_addrs": true,
+  "data_dir": "/mnt/consul",
+  "disable_remote_exec": true,
+  "disable_update_check": true,
+  "bootstrap_expect": ${instance_count},
+  "leave_on_terminate": true,
+  "retry_join": [ "provider=aws tag_key=ResourceGroup tag_value=${namespace}" ],
+  "retry_join_wan" : [ ${join_wan}],
+  "server": true,
+  "raft_protocol": 3,
+  "ui": true,
+  "autopilot": {
+    "cleanup_dead_servers": true,
+    "last_contact_threshold": "200ms",
+    "max_trailing_logs": 250,
+    "server_stabilization_time": "10s"
+  },
+  "addresses": {
+    "http": "0.0.0.0"
+  },
+  "log_level" : "DEBUG",
+  "enable_syslog" : true,
+  "encrypt": "${encrypt_id}",  
+  "ca_file": "/mnt/consul/certs/ca.crt",
+  "cert_file": "/mnt/consul/certs/agent.crt",
+  "key_file": "/mnt/consul/certs/agent.key",
+  "verify_incoming": true,
+  "verify_outgoing": true,
+  "auto_encrypt": {
+    "allow_tls": true
+  },
+  "ports": {
+    "grpc": 8502
+  },
+  "connect": {
+    "enabled": true
+  }
+}
